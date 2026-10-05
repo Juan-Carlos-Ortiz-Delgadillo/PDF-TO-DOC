@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Aplicación de escritorio local para convertir PDF a DOCX"
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
-license = { text = "MIT" }
+license = { text = "AGPL-3.0-only" }
 authors = [{ name = "PDF2Word" }]
 dependencies = [
   "PyMuPDF==1.26.7",

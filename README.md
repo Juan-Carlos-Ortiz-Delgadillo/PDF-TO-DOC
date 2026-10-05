@@ -42,6 +42,11 @@ python -m app.main input.pdf output.docx --ocr --language spa
 
 La conversión se realiza localmente. El proyecto no envía documentos a servicios remotos ni registra su contenido.
 
+## Licencia
+
+PDF2Word se distribuye bajo la licencia GNU Affero General Public License v3.0 (AGPL-3.0-only).
+Consulta el texto completo en [LICENSE](LICENSE).
+
 ## Limitaciones conocidas
 
 - El OCR es opcional y depende de Tesseract/OCRmyPDF instalados localmente.
