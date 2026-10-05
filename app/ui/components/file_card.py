@@ -26,7 +26,7 @@ class FileDetailsCard(QFrame):
         self._meta.setWordWrap(True)
         self._status = QLabel("Estado: pendiente de análisis")
         self._status.setWordWrap(True)
-        self._status.setStyleSheet("color: #5f6368;")
+        self._status.setObjectName("status")
 
         left = QVBoxLayout()
         left.setSpacing(4)
@@ -57,14 +57,12 @@ class FileDetailsCard(QFrame):
         pages_label = str(page_count) if page_count is not None else "—"
         self._meta.setText(f"Tamaño: {size_label}  •  Páginas: {pages_label}")
         self._status.setText(f"Estado: {status}")
-        self._status.setStyleSheet("color: #1f6feb; font-weight: 600;")
 
     def clear(self) -> None:
         self._name.setText("Sin archivo seleccionado")
         self._path.setText("Aún no hay un PDF cargado.")
         self._meta.setText("Tamaño: —  •  Páginas: —")
         self._status.setText("Estado: pendiente de análisis")
-        self._status.setStyleSheet("color: #5f6368;")
 
     @staticmethod
     def _format_size(size_bytes: int) -> str:

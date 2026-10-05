@@ -20,15 +20,17 @@ class ProgressCard(QFrame):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setMinimumHeight(180)
+        self.setMinimumHeight(56)
+        self.setMaximumHeight(72)
 
         self._icon = QLabel("⏳")
-        self._icon.setStyleSheet("font-size: 28px;")
+        self._icon.setStyleSheet("font-size: 22px;")
         self._icon.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self._title = QLabel("Esperando archivo")
-        self._title.setStyleSheet("font-size: 18px; font-weight: 700;")
+        self._title.setObjectName("_title")
         self._title.setWordWrap(True)
         self._message = QLabel("Selecciona un PDF para comenzar.")
+        self._message.setObjectName("_message")
         self._message.setWordWrap(True)
 
         self._progress = QProgressBar()
@@ -41,14 +43,14 @@ class ProgressCard(QFrame):
         self._cancel.setVisible(False)
 
         text_layout = QVBoxLayout()
-        text_layout.setSpacing(6)
+        text_layout.setSpacing(3)
         text_layout.addWidget(self._title)
         text_layout.addWidget(self._message)
         text_layout.addWidget(self._progress)
 
         row = QHBoxLayout(self)
-        row.setContentsMargins(12, 12, 12, 12)
-        row.setSpacing(12)
+        row.setContentsMargins(8, 7, 8, 7)
+        row.setSpacing(8)
         row.addWidget(self._icon)
         row.addLayout(text_layout, 1)
         row.addWidget(self._cancel)

@@ -41,8 +41,10 @@ class SettingsDialog(QDialog):
         form = QFormLayout()
 
         self.theme_combo = QComboBox()
-        self.theme_combo.addItems([Theme.SYSTEM.value, Theme.LIGHT.value, Theme.DARK.value])
-        self.theme_combo.setCurrentText(self.settings.theme.value)
+        self.theme_combo.addItem("Predeterminado (claro)", Theme.SYSTEM.value)
+        self.theme_combo.addItem("Día (suave)", Theme.LIGHT.value)
+        self.theme_combo.addItem("Noche", Theme.DARK.value)
+        self.theme_combo.setCurrentIndex(self.theme_combo.findData(self.settings.theme.value))
 
         self.output_dir = QLineEdit(str(self.settings.output_directory))
         self.output_dir.setReadOnly(True)
@@ -86,7 +88,7 @@ class SettingsDialog(QDialog):
 
     def _save(self) -> None:
         self.settings = AppSettings(
-            theme=self.theme_combo.currentText(),
+            theme=self.theme_combo.currentData(),
             overwrite_policy=self.settings.overwrite_policy,
             ocr_enabled=self.ocr_enabled.isChecked(),
             ocr_language=self.ocr_language.currentText(),

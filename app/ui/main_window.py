@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from app.core.config import Theme
 from app.models import ConversionConfig, PageSelection
 from app.services import ConversionService
 from app.services.settings_service import SettingsService
@@ -91,6 +92,7 @@ class MainWindow(QMainWindow):
         self.analysis_thread: PdfAnalysisThread | None = None
         self.conversion_thread: ConversionThread | None = None
         self._cancel_requested = False
+        self._apply_stylesheet()
         self._build_ui()
         self._apply_saved_settings()
         self._setup_page_selection()
@@ -108,36 +110,31 @@ class MainWindow(QMainWindow):
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
         central_widget = QWidget(self)
+        central_widget.setObjectName("central-panel")
         root_layout = QVBoxLayout(central_widget)
         root_layout.setContentsMargins(16, 16, 16, 16)
-        root_layout.setSpacing(12)
+        root_layout.setSpacing(10)
 
         top_row = QHBoxLayout()
         top_row.setContentsMargins(0, 0, 0, 0)
-        top_row.setSpacing(10)
-        app_icon = QLabel("PDF")
-        app_icon.setStyleSheet("font-size: 26px; font-weight: 700; color: #d93025;")
-        app_icon.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        top_row.setSpacing(8)
         app_title = QLabel("PDF2Word")
+        app_title.setObjectName("app-title")
         app_title.setStyleSheet("font-size: 22px; font-weight: 700;")
         app_title.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         subtitle = QLabel("Convierte tus documentos PDF a Word fácilmente")
-        subtitle.setStyleSheet("color: #5f6368;")
+        subtitle.setObjectName("app-subtitle")
         subtitle.setWordWrap(True)
         subtitle.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        spacer = QWidget()
-        spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         self.config_button = _tool_button("⚙️", "Configuración")
         self.about_button = _tool_button("ℹ️", "Acerca de")
-        self.config_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        self.about_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.config_button.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        self.about_button.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         self.config_button.clicked.connect(self._open_settings)
         self.about_button.clicked.connect(self._open_about)
 
-        top_row.addWidget(app_icon)
         top_row.addWidget(app_title)
         top_row.addWidget(subtitle)
-        top_row.addWidget(spacer)
         top_row.addWidget(self.config_button)
         top_row.addWidget(self.about_button)
         root_layout.addLayout(top_row)
@@ -161,7 +158,7 @@ class MainWindow(QMainWindow):
         self.output_dir_edit = QLineEdit()
         self.output_dir_edit.setPlaceholderText("Selecciona la carpeta de destino")
         self.output_dir_edit.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        choose_dir = _primary_action_button("Examinar...")
+        choose_dir = _secondary_action_button("Examinar...")
         choose_dir.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         choose_dir.clicked.connect(self._choose_output_directory)
         output_layout.addWidget(self.output_dir_edit, 1, 0)
@@ -257,7 +254,7 @@ class MainWindow(QMainWindow):
         result_row.addWidget(self.open_folder_button)
         root_layout.addLayout(result_row)
 
-        actions_row = QGridLayout()
+        actions_row = QHBoxLayout()
         actions_row.setContentsMargins(0, 0, 0, 0)
         actions_row.setSpacing(10)
         self.convert_button = _primary_action_button("Convertir a Word")
@@ -266,19 +263,25 @@ class MainWindow(QMainWindow):
         self.convert_button.clicked.connect(self._start_conversion)
         self.clean_button.clicked.connect(self._clear_form)
         self.quit_button.clicked.connect(self.close)
-        self.convert_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self.clean_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self.quit_button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        actions_row.addWidget(self.convert_button, 0, 0)
-        actions_row.addWidget(self.clean_button, 0, 1)
-        actions_row.addWidget(self.quit_button, 0, 2)
-        actions_row.setColumnStretch(0, 1)
-        actions_row.setColumnStretch(1, 1)
-        actions_row.setColumnStretch(2, 1)
+        self.convert_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.clean_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.quit_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        actions_row.addWidget(self.clean_button)
+        actions_row.addWidget(self.quit_button)
+        actions_row.addStretch(1)
+        actions_row.addWidget(self.convert_button)
         root_layout.addLayout(actions_row)
 
         scroll_area.setWidget(central_widget)
         self.setCentralWidget(scroll_area)
+
+    def _apply_stylesheet(self) -> None:
+        stylesheet_path = Path(__file__).with_name("styles.qss")
+        stylesheet = stylesheet_path.read_text(encoding="utf-8")
+        if self.settings.theme is Theme.DARK:
+            dark_stylesheet_path = stylesheet_path.with_name("styles_dark.qss")
+            stylesheet += "\n" + dark_stylesheet_path.read_text(encoding="utf-8")
+        self.setStyleSheet(stylesheet)
 
     def _apply_saved_settings(self) -> None:
         self.output_dir_edit.setText(str(self.settings.output_directory))
@@ -511,7 +514,7 @@ class MainWindow(QMainWindow):
         settings_dialog = SettingsDialog(self.settings, self.settings_service, self)
         if settings_dialog.exec() == SettingsDialog.DialogCode.Accepted:
             self.settings = self.settings_service.load()
-            self.settings_service.save(self.settings)
+            self._apply_stylesheet()
             self.output_dir_edit.setText(str(self.settings.output_directory))
             self.ocr_checkbox.setChecked(self.settings.ocr_enabled)
 
@@ -559,6 +562,7 @@ def _tool_button(icon: str, label: str):
     from PySide6.QtWidgets import QPushButton
 
     button = QPushButton(f"{icon} {label}")
+    button.setObjectName("tool-button")
     return button
 
 
@@ -566,9 +570,7 @@ def _primary_action_button(label: str):
     from PySide6.QtWidgets import QPushButton
 
     button = QPushButton(label)
-    button.setStyleSheet(
-        "QPushButton { background: #1f6feb; color: white; border-radius: 10px; padding: 8px 14px; }"
-    )
+    button.setObjectName("primary")
     return button
 
 
@@ -576,7 +578,7 @@ def _secondary_action_button(label: str):
     from PySide6.QtWidgets import QPushButton
 
     button = QPushButton(label)
-    button.setStyleSheet("QPushButton { border-radius: 10px; padding: 8px 14px; }")
+    button.setObjectName("secondary")
     return button
 
 

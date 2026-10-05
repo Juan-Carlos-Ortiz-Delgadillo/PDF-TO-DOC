@@ -1,0 +1,147 @@
+QMainWindow,
+QWidget {
+    color: #e6e8eb;
+    background: #202326;
+}
+
+QMainWindow,
+QScrollArea,
+QWidget#central-panel {
+    background: #202326;
+}
+
+QLabel#app-title {
+    color: #f0f2f4;
+}
+
+QLabel#app-subtitle {
+    color: #b4bbc3;
+}
+
+DropZone {
+    border-color: #515963;
+    background: #282d32;
+}
+
+DropZone QLabel#title {
+    color: #f0f2f4;
+}
+
+DropZone QLabel#subtitle {
+    color: #d1d5da;
+}
+
+DropZone:hover {
+    background: #30373e;
+}
+
+DropZone[active="true"],
+DropZone[active="true"]:hover {
+    background: #26394f;
+    border-color: #77a9f7;
+}
+
+QLineEdit {
+    color: #e6e8eb;
+    background: #30363d;
+    border-color: #505862;
+}
+
+QLineEdit:focus {
+    background: #373e46;
+    border-color: #77a9f7;
+}
+
+QLineEdit:disabled {
+    color: #b4bbc3;
+    background: #292e34;
+    border-color: #454c55;
+}
+
+QPushButton#primary {
+    color: #ffffff;
+    background: #3978d4;
+}
+
+QPushButton#primary:hover {
+    background: #4b8be8;
+}
+
+QPushButton#primary:focus {
+    border-color: #a3c7ff;
+}
+
+QPushButton#secondary,
+DropZone QPushButton {
+    color: #b7d2ff;
+    background: transparent;
+    border-color: #6499e8;
+}
+
+QPushButton#secondary:hover,
+DropZone QPushButton:hover {
+    color: #e6f0ff;
+    background: #303c4b;
+    border-color: #8db5f5;
+}
+
+QPushButton#secondary:focus,
+DropZone QPushButton:focus {
+    border-color: #a3c7ff;
+}
+
+QPushButton#tool-button {
+    color: #d1d5da;
+    background: transparent;
+    border-color: #454c55;
+}
+
+QPushButton#tool-button:hover {
+    color: #e6f0ff;
+    background: #30373e;
+    border-color: #6499e8;
+}
+
+QPushButton#tool-button:focus {
+    border-color: #a3c7ff;
+}
+
+QPushButton:disabled {
+    color: #a8b0b9;
+    background: #353b42;
+    border-color: #353b42;
+}
+
+FileDetailsCard {
+    border-color: #3a4047;
+    background: #282d32;
+}
+
+FileDetailsCard QLabel#status {
+    color: #b4bbc3;
+}
+
+ProgressCard {
+    border-color: #3a4047;
+    background: #292f36;
+}
+
+ProgressCard QLabel {
+    color: #d1d5da;
+}
+
+ProgressCard QLabel[objectName="_title"] {
+    color: #c3d9ff;
+}
+
+ProgressCard QLabel[objectName="_message"] {
+    color: #b4bbc3;
+}
+
+QProgressBar {
+    background: #3a414a;
+}
+
+QProgressBar::chunk {
+    background: #6499e8;
+}

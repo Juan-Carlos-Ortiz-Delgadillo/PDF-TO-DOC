@@ -17,28 +17,32 @@ class DropZone(QFrame):
     def __init__(self, parent: object | None = None) -> None:
         super().__init__(parent)
         self.setAcceptDrops(True)
-        self.setMinimumHeight(180)
+        self.setMinimumHeight(116)
+        self.setMaximumHeight(150)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         self._drag_active = False
 
         self._icon = QLabel("PDF")
         self._icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._icon.setStyleSheet("font-size: 36px; font-weight: 700; color: #d93025;")
+        self._icon.setStyleSheet("font-size: 32px; font-weight: 700; color: #d93025;")
 
         self._title = QLabel("Selecciona tu archivo PDF")
-        self._title.setStyleSheet("font-size: 20px; font-weight: 600;")
+        self._title.setObjectName("title")
         self._title.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self._subtitle = QLabel("Arrastra un PDF aquí o selecciónalo desde tu equipo")
+        self._subtitle.setObjectName("subtitle")
         self._subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._subtitle.setWordWrap(True)
 
         self._button = QPushButton("Seleccionar PDF")
+        self._button.setObjectName("secondary")
         self._button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self._button.clicked.connect(self._open_file_dialog)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setContentsMargins(12, 10, 12, 10)
+        layout.setSpacing(6)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self._icon)
         layout.addWidget(self._title)
@@ -104,11 +108,11 @@ class DropZone(QFrame):
         return False
 
     def _apply_base_styles(self) -> None:
-        self.setStyleSheet(
-            "QFrame { border: 2px dashed #d0d7de; border-radius: 16px; background: #f8f9fb; }"
-        )
+        self.setProperty("active", False)
+        self.style().unpolish(self)
+        self.style().polish(self)
 
     def _apply_drag_styles(self) -> None:
-        self.setStyleSheet(
-            "QFrame { border: 2px solid #1f6feb; border-radius: 16px; background: #e9f2ff; }"
-        )
+        self.setProperty("active", True)
+        self.style().unpolish(self)
+        self.style().polish(self)
