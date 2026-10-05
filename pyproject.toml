@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=75.8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdf2word"
+version = "0.1.0"
+description = "Aplicación de escritorio local para convertir PDF a DOCX"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+license = { text = "MIT" }
+authors = [{ name = "PDF2Word" }]
+dependencies = [
+  "PyMuPDF==1.26.7",
+  # Qt Core/Gui/Widgets; los módulos Addons no se requieren para esta aplicación.
+  "PySide6-Essentials==6.6.3",
+  "pdf2docx==0.5.13",
+  "python-docx==1.1.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy==1.15.0",
+  "pytest==8.3.5",
+  "pytest-qt==4.4.0",
+  "ruff==0.9.10",
+]
+
+[project.scripts]
+pdf2word = "app.main:main"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+qt_api = "pyside6"
+markers = [
+  "integration: prueba que requiere el motor real de conversión",
+  "ocr: prueba que requiere OCRmyPDF y Tesseract configurados",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = [".venv", "build", "dist"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["app"]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+strict_equality = true
+exclude = [".venv", "build", "dist"]
+
+[[tool.mypy.overrides]]
+module = ["fitz", "pdf2docx", "docx", "docx.*"]
+ignore_missing_imports = true

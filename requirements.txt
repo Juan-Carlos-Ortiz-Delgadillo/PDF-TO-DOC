@@ -1,0 +1,11 @@
+# Dependencias de runtime de PDF2Word
+PyMuPDF==1.26.7
+PySide6-Essentials==6.6.3
+pdf2docx==0.5.13
+python-docx==1.1.2
+
+# Dependencias opcionales para desarrollo/pruebas
+# pytest==8.3.5
+# pytest-qt==4.4.0
+# ruff==0.9.10
+# mypy==1.15.0
