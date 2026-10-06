@@ -55,9 +55,8 @@ python build.py --mode onedir
 El proceso genera una aplicación GUI autocontenida en formato PyInstaller
 `--onedir`, mide diez lanzamientos desde el inicio del proceso hasta el primer
 paint de Qt y crea un archivo comprimido con checksum SHA-256 en `dist/`.
-Falla si el primer lanzamiento supera 0,9 s o la mediana de los nueve
-lanzamientos siguientes supera 0,45 s; esos umbrales dejan un margen del 10 %
-respecto al objetivo de 1 s en frío y 500 ms en caliente. “Frío” en este test
+Falla si el primer lanzamiento supera 1 s o la mediana de los nueve
+lanzamientos siguientes supera 500 ms. “Frío” en este test
 significa el primer proceso tras compilar: GitHub-hosted runners no garantizan
 una caché de disco/OS vacía. La prueba usa el plugin Qt offscreen, por lo que
 mide el primer render de la ventana sin medir inicialización física del monitor.
@@ -81,16 +80,16 @@ El mantenedor confirma que creó el icono y autoriza su uso y redistribución p�
 
 ## Descargas
 
-Descarga la versión más reciente desde [GitHub Releases](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest). El release contiene estos paquetes:
+Descarga la versión más reciente desde [GitHub Releases](https://github.com/Juan-Carlos-Ortiz-Delgadillo/PDF-TO-DOC/releases/latest). El release contiene estos paquetes:
 
 | Sistema | Archivo | Arquitectura |
 | --- | --- | --- |
-| macOS | [`PDF2Word.dmg`](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest/download/PDF2Word.dmg) | Apple Silicon (arm64) |
-| macOS, alternativa comprimida | `PDF2Word-<version>-macos-arm64.tar.gz` ([release](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest)) | Apple Silicon (arm64) |
-| Windows | `PDF2Word-<version>-windows-x86_64.zip` ([release](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest)) | 64 bits, Intel/AMD (x86_64) |
-| Linux | `PDF2Word-<version>-linux-x86_64.tar.gz` ([release](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest)) | 64 bits, Intel/AMD (x86_64) |
+| macOS | [`PDF2Word.dmg`](https://github.com/Juan-Carlos-Ortiz-Delgadillo/PDF-TO-DOC/releases/latest/download/PDF2Word.dmg) | Apple Silicon (arm64) |
+| macOS, alternativa comprimida | `PDF2Word-<version>-macos-arm64.tar.gz` ([release](https://github.com/Juan-Carlos-Ortiz-Delgadillo/PDF-TO-DOC/releases/latest)) | Apple Silicon (arm64) |
+| Windows | `PDF2Word-<version>-windows-x86_64.zip` ([release](https://github.com/Juan-Carlos-Ortiz-Delgadillo/PDF-TO-DOC/releases/latest)) | 64 bits, Intel/AMD (x86_64) |
+| Linux | `PDF2Word-<version>-linux-x86_64.tar.gz` ([release](https://github.com/Juan-Carlos-Ortiz-Delgadillo/PDF-TO-DOC/releases/latest)) | 64 bits, Intel/AMD (x86_64) |
 
-`<version>` es el número de versión del release (por ejemplo, `1.0.0`). Abre la página del release y descarga el archivo de la tabla que coincida con tu sistema y arquitectura.
+`<version>` es el número de versión del release (por ejemplo, `1.0.2`). Abre la página del release y descarga el archivo de la tabla que coincida con tu sistema y arquitectura.
 
 Los paquetes son ejecutables autocontenidos: no requieren instalar Python. Linux sí necesita las bibliotecas gráficas del sistema indicadas abajo.
 
@@ -115,10 +114,10 @@ ejecutable no tiene firma de editor.
 
 ### Instalar en Linux
 
-Descarga el archivo `PDF2Word-<version>-linux-x86_64.tar.gz` y abre una terminal en la carpeta donde se descargó. Para la versión 1.0.0, ejecuta:
+Descarga el archivo `PDF2Word-<version>-linux-x86_64.tar.gz` y abre una terminal en la carpeta donde se descargó. Para la versión 1.0.2, ejecuta:
 
 ```bash
-tar -xzf PDF2Word-1.0.0-linux-x86_64.tar.gz
+tar -xzf PDF2Word-1.0.2-linux-x86_64.tar.gz
 ./PDF2Word/PDF2Word
 ```
 
@@ -140,19 +139,19 @@ No necesitas instalar Python. El ejecutable incluye Python y las dependencias de
 
 ### Comprobar la descarga
 
-Cada paquete comprimido tiene un manifiesto `SHA256SUMS-PDF2Word-<version>-<plataforma>.txt` con su SHA-256. Descarga el manifiesto correspondiente en la misma carpeta que el paquete. En Linux, por ejemplo para la versión 1.0.0:
+Cada paquete comprimido tiene un manifiesto `SHA256SUMS-PDF2Word-<version>-<plataforma>.txt` con su SHA-256. Descarga el manifiesto correspondiente en la misma carpeta que el paquete. En Linux, por ejemplo para la versión 1.0.2:
 
 ```bash
-sha256sum --check SHA256SUMS-PDF2Word-1.0.0-linux-x86_64.txt
+sha256sum --check SHA256SUMS-PDF2Word-1.0.2-linux-x86_64.txt
 ```
 
-Para el DMG de macOS, descarga también [`PDF2Word.dmg.sha256`](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest/download/PDF2Word.dmg.sha256), colócalo junto al DMG y ejecuta `shasum -a 256 -c PDF2Word.dmg.sha256` desde esa carpeta. Un resultado `OK` confirma que el archivo coincide con el checksum publicado. Los checksums no instalan la aplicación.
+Para el DMG de macOS, descarga también [`PDF2Word.dmg.sha256`](https://github.com/Juan-Carlos-Ortiz-Delgadillo/PDF-TO-DOC/releases/latest/download/PDF2Word.dmg.sha256), colócalo junto al DMG y ejecuta `shasum -a 256 -c PDF2Word.dmg.sha256` desde esa carpeta. Un resultado `OK` confirma que el archivo coincide con el checksum publicado. Los checksums no instalan la aplicación.
 
-En macOS se comprueba un manifiesto de paquete comprimido con `shasum -a 256 -c <nombre-del-manifiesto>`. En Windows PowerShell, con el ZIP y su manifiesto en la misma carpeta, ejecuta (sustituye `1.0.0` si descargaste otra versión):
+En macOS se comprueba un manifiesto de paquete comprimido con `shasum -a 256 -c <nombre-del-manifiesto>`. En Windows PowerShell, con el ZIP y su manifiesto en la misma carpeta, ejecuta (sustituye `1.0.2` si descargaste otra versión):
 
 ```powershell
-$expected = ((Get-Content .\SHA256SUMS-PDF2Word-1.0.0-windows-x86_64.txt -Raw) -split '\s+')[0]
-$actual = (Get-FileHash .\PDF2Word-1.0.0-windows-x86_64.zip -Algorithm SHA256).Hash
+$expected = ((Get-Content .\SHA256SUMS-PDF2Word-1.0.2-windows-x86_64.txt -Raw) -split '\s+')[0]
+$actual = (Get-FileHash .\PDF2Word-1.0.2-windows-x86_64.zip -Algorithm SHA256).Hash
 if ($actual -ne $expected) { throw "Checksum incorrecto" }
 "Checksum OK"
 ```
@@ -189,8 +188,8 @@ PDF2Word se distribuye bajo GNU Affero General Public License v3.0 (AGPL-3.0-onl
 Tras revisar la versión, crea y publica el primer tag:
 
 ```bash
-git tag v1.0.0
-git push --tags
+git tag v1.0.2
+git push upstream v1.0.2
 ```
 
 GitHub Actions construye artefactos por plataforma, prueba su arranque y los adjunta al Release.

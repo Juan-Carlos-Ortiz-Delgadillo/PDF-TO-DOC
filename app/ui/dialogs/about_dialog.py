@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from PySide6.QtWidgets import QDialog, QLabel, QVBoxLayout
 
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.0.2"
 
 
 class AboutDialog(QDialog):
