@@ -5,7 +5,7 @@ from pathlib import Path
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtWidgets import QApplication, QDialogButtonBox, QPushButton
+from PySide6.QtWidgets import QApplication, QDialogButtonBox, QMessageBox, QPushButton
 
 from app.core.config import AppSettings, ConfigRepository, Theme
 from app.services.settings_service import SettingsService
@@ -91,6 +91,43 @@ def test_settings_dialog_action_buttons_are_distinguishable(tmp_path: Path) -> N
     assert cancel_button.objectName() == "secondary"
     assert "QPushButton#primary" in window.styleSheet()
     assert "QPushButton#secondary" in window.styleSheet()
+    app.processEvents()
+
+
+def test_overwrite_dialog_buttons_are_distinguishable_and_not_clipped(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    app = QApplication.instance() or QApplication([])
+    window = MainWindow()
+    output_path = tmp_path / "existing.docx"
+    output_path.write_bytes(b"existing file")
+    window.current_pdf_path = tmp_path / "input.pdf"
+    window.output_dir_edit.setText(str(tmp_path))
+    window.output_name_edit.setText(output_path.name)
+    inspected_buttons: dict[str, QPushButton] = {}
+    dialog_stylesheet: list[str] = []
+
+    def inspect_dialog(dialog: QMessageBox) -> int:
+        inspected_buttons.update({button.text(): button for button in dialog.buttons()})
+        dialog_stylesheet.append(dialog.styleSheet())
+        inspected_buttons["Cancelar"].click()
+        return 0
+
+    monkeypatch.setattr(QMessageBox, "exec", inspect_dialog)
+    window._start_conversion()
+
+    assert inspected_buttons["Reemplazar"].objectName() == "primary"
+    assert inspected_buttons["Elegir otro nombre"].objectName() == "secondary"
+    assert inspected_buttons["Cancelar"].objectName() == "secondary"
+    assert inspected_buttons["Reemplazar"].minimumWidth() >= 136
+    assert inspected_buttons["Elegir otro nombre"].minimumWidth() >= 184
+    assert inspected_buttons["Cancelar"].minimumWidth() >= 128
+    assert window.conversion_thread is None
+    assert "QPushButton#primary" in window.styleSheet()
+    assert "QPushButton#secondary" in window.styleSheet()
+    assert "border: 2px solid #173f87" in dialog_stylesheet[0]
+    assert "border: 2px solid #377dff" in dialog_stylesheet[0]
     app.processEvents()
 
 

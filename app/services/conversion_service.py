@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import logging
 import time
 from pathlib import Path
 
@@ -11,6 +12,8 @@ from app.models import ConversionConfig, ConversionResult, PDFInfo
 from app.services.ocr_service import OCRService
 from app.services.output_service import OutputService
 from app.services.pdf_analyzer import PDFAnalyzer
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class ConversionService:
@@ -121,9 +124,12 @@ class ConversionService:
         try:
             from pdf2docx import Converter
         except ImportError as error:
+            _LOGGER.exception("No fue posible cargar pdf2docx o una de sus dependencias.")
             raise ConversionError(
-                "Falta la dependencia local 'pdf2docx'.",
-                diagnostic_message="No fue posible importar pdf2docx.",
+                "No fue posible cargar pdf2docx para convertir el documento.",
+                diagnostic_message=(
+                    f"Error al importar pdf2docx: {type(error).__name__}: {error}"
+                ),
                 error_code="pdf2docx_missing",
             ) from error
 

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import builtins
+import logging
 from pathlib import Path
 
 import fitz
 import pytest
 from docx import Document
 
+from app.core.exceptions import ConversionError
 from app.models import ConversionConfig, PageSelection
 from app.services import ConversionService
 
@@ -57,7 +60,43 @@ def test_conversion_service_converts_simple_pdf(tmp_path: Path) -> None:
     result = ConversionService().convert(config)
     assert result.output_path == docx_path
     assert docx_path.exists()
+    assert docx_path.stat().st_size > 0
+    assert Document(docx_path).paragraphs
     assert result.status.name == "COMPLETED"
+
+
+def test_pdf2docx_import_error_includes_cause_and_logs_traceback(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    original_import = builtins.__import__
+
+    def fail_pdf2docx_import(
+        name: str,
+        globals: object = None,
+        locals: object = None,
+        fromlist: tuple[str, ...] = (),
+        level: int = 0,
+    ) -> object:
+        if name == "pdf2docx":
+            raise ImportError("numpy loader failure")
+        return original_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", fail_pdf2docx_import)
+    caplog.set_level(logging.ERROR)
+
+    with pytest.raises(ConversionError, match="ImportError: numpy loader failure"):
+        ConversionService()._convert_pdf_to_docx(
+            "unused.pdf",
+            "unused.docx",
+            (1,),
+            total_pages=1,
+            multiprocessing_enabled=False,
+        )
+
+    error_record = next(record for record in caplog.records if "pdf2docx" in record.message)
+    assert error_record.exc_info is not None
+    assert error_record.exc_info[0] is ImportError
 
 
 @pytest.mark.parametrize(
