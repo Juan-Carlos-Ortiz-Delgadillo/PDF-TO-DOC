@@ -67,7 +67,7 @@ ventana principal queda lista después de la splash.
 En macOS el archivo comprimido contiene `PDF2Word.app`; en Windows y Linux
 contiene una carpeta `PDF2Word` con el ejecutable y sus dependencias. La
 construcción se hace nativamente en cada plataforma. CI ejecuta la medición
-para macOS 15 arm64, Windows x86_64 y Linux x86_64. El binario Linux requiere
+para macOS arm64, Windows x86_64 y Linux x86_64. El binario Linux requiere
 bibliotecas del sistema compatibles con Ubuntu 22.04 o posterior.
 
 `--onefile` se puede seleccionar para comparar con
