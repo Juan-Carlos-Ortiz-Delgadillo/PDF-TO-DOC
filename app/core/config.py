@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import Enum
@@ -115,7 +116,7 @@ class ConfigRepository:
         if os.name == "nt":
             base = Path(os.environ.get("APPDATA") or (Path.home() / "AppData" / "Roaming"))
             return base / "PDF2Word" / "settings.json"
-        if os.sys.platform == "darwin":
+        if sys.platform == "darwin":
             return Path.home() / "Library" / "Application Support" / "PDF2Word" / "settings.json"
         base = Path(os.environ.get("XDG_CONFIG_HOME") or (Path.home() / ".config"))
         return base / "pdf2word" / "settings.json"

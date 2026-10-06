@@ -51,7 +51,7 @@ class ConversionConfig:
 
     @staticmethod
     def _coerce_path(value: Path | os.PathLike[str] | str, field_name: str) -> Path:
-        if not isinstance(value, Path | os.PathLike[str] | str):
+        if not isinstance(value, Path | os.PathLike | str):
             raise TypeError(f"{field_name} debe ser una ruta.")
         path = Path(value)
         if not str(path):

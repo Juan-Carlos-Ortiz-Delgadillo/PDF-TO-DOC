@@ -6,6 +6,7 @@ import copy
 import logging
 import os
 import re
+import sys
 from collections.abc import Mapping
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -75,8 +76,13 @@ class SanitizingFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         safe_record = copy.copy(record)
-        safe_record.msg = sanitize_log_value(record.msg)
+        safe_record.msg = (
+            record.msg if isinstance(record.msg, str) else sanitize_log_value(record.msg)
+        )
         safe_record.args = sanitize_log_value(record.args)
+        safe_message = sanitize_text(safe_record.getMessage())
+        safe_record.msg = "%s"
+        safe_record.args = (safe_message,)
         return super().format(safe_record)
 
 
@@ -86,7 +92,7 @@ def get_default_log_path() -> Path:
     if os.name == "nt":
         base = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
         return base / "PDF2Word" / "logs" / f"{APP_SLUG}.log"
-    if os.sys.platform == "darwin":
+    if sys.platform == "darwin":
         return Path.home() / "Library" / "Logs" / "PDF2Word" / f"{APP_SLUG}.log"
     base = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local" / "state"))
     return base / APP_SLUG / "logs" / f"{APP_SLUG}.log"

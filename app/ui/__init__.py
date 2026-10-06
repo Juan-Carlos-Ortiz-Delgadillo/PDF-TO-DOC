@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
-try:
-    from app.ui.main_window import MainWindow
-except Exception:  # pragma: no cover - fallback defensivo para entornos sin GUI
-    class MainWindow:  # type: ignore[no-redef]
-        """Fallback mínimo cuando la GUI no está disponible."""
+from typing import TYPE_CHECKING
 
-        def __init__(self, *args: object, **kwargs: object) -> None:
-            self.args = args
-            self.kwargs = kwargs
+if TYPE_CHECKING:
+    from app.ui.main_window import MainWindow
+
+
+def __getattr__(name: str) -> type[MainWindow]:
+    if name != "MainWindow":
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    from app.ui.main_window import MainWindow
+
+    return MainWindow
 
 
 __all__ = ["MainWindow"]

@@ -51,7 +51,7 @@ class PDFAnalyzer:
 
         return self._minimum_image_coverage
 
-    def analyze(self, path: Path) -> PDFInfo:
+    def analyze(self, path: Path | str) -> PDFInfo:
         """Analiza *path* sin modificarlo y devuelve información tipada.
 
         Raises:
@@ -62,7 +62,7 @@ class PDFAnalyzer:
                 válido o no está disponible.
         """
 
-        pdf_path = self.validate_input(path)
+        pdf_path = self.validate_input(Path(path))
         fitz = self._load_fitz()
         document: Any | None = None
 

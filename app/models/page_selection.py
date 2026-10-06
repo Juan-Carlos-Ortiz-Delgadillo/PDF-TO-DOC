@@ -115,18 +115,21 @@ class PageSelection:
         text = value.strip()
         if not text:
             raise PageSelectionError("Indica las páginas que quieres convertir.")
-        if text.casefold() in _ALL_TOKENS:
-            selection = cls.all()
-        else:
-            range_match = _RANGE_RE.fullmatch(text)
-            if range_match:
-                selection = cls.range(int(range_match.group(1)), int(range_match.group(2)))
-            elif _PAGES_RE.fullmatch(text):
-                selection = cls.specific([int(item.strip()) for item in text.split(",")])
+        try:
+            if text.casefold() in _ALL_TOKENS:
+                selection = cls.all()
             else:
-                raise PageSelectionError(
-                    "Usa todas las páginas, un rango como 3-8 o una lista como 1,4,9."
-                )
+                range_match = _RANGE_RE.fullmatch(text)
+                if range_match:
+                    selection = cls.range(int(range_match.group(1)), int(range_match.group(2)))
+                elif _PAGES_RE.fullmatch(text):
+                    selection = cls.specific([int(item.strip()) for item in text.split(",")])
+                else:
+                    raise PageSelectionError(
+                        "Usa todas las páginas, un rango como 3-8 o una lista como 1,4,9."
+                    )
+        except ValueError as error:
+            raise PageSelectionError(str(error)) from error
         return selection.validate_for(total_pages)
 
     def validate_for(self, total_pages: int) -> PageSelection:

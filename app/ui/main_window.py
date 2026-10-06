@@ -11,6 +11,7 @@ from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
+    QCheckBox,
     QFileDialog,
     QFrame,
     QGridLayout,
@@ -19,6 +20,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QMainWindow,
     QMessageBox,
+    QPushButton,
     QRadioButton,
     QScrollArea,
     QSizePolicy,
@@ -562,39 +564,26 @@ class MainWindow(QMainWindow):
         super().closeEvent(event)
 
 
-def _checkbox(label: str) -> object:
-    checkbox = __import__("PySide6.QtWidgets", fromlist=["QCheckBox"]).QCheckBox(label)
-    return checkbox
+def _checkbox(label: str) -> QCheckBox:
+    return QCheckBox(label)
 
 
-def _tool_button(icon: str, label: str):
-    from PySide6.QtWidgets import QPushButton
-
+def _tool_button(icon: str, label: str) -> QPushButton:
     button = QPushButton(f"{icon} {label}")
     button.setObjectName("tool-button")
     return button
 
 
-def _primary_action_button(label: str):
-    from PySide6.QtWidgets import QPushButton
-
+def _primary_action_button(label: str) -> QPushButton:
     button = QPushButton(label)
     button.setObjectName("primary")
     return button
 
 
-def _secondary_action_button(label: str):
-    from PySide6.QtWidgets import QPushButton
-
+def _secondary_action_button(label: str) -> QPushButton:
     button = QPushButton(label)
     button.setObjectName("secondary")
     return button
-
-
-def _size_policy():
-    from PySide6.QtWidgets import QSizePolicy
-
-    return QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
 
 def main() -> int:

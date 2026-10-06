@@ -48,6 +48,3 @@ class DependencyCheckService:
             "languages": status.languages,
             "is_available": status.is_available,
         }
-
-
-OCRDependencyStatus = OCRDependencyStatus

@@ -59,7 +59,7 @@ class DropZone(QFrame):
         else:
             event.ignore()
 
-    def dragLeaveEvent(self, event: object) -> None:
+    def dragLeaveEvent(self, _event: object) -> None:
         self._drag_active = False
         self._apply_base_styles()
 

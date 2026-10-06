@@ -88,7 +88,10 @@ def atomic_write_text(
         )
         temporary_path = Path(temporary_name)
         try:
-            os.fchmod(descriptor, mode)
+            if hasattr(os, "fchmod"):
+                os.fchmod(descriptor, mode)
+            else:
+                os.chmod(temporary_name, mode)
             with os.fdopen(descriptor, "w", encoding=encoding) as temporary_file:
                 descriptor = -1
                 temporary_file.write(content)

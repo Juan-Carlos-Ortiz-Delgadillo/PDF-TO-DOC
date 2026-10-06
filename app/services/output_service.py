@@ -7,7 +7,7 @@ import os
 import shutil
 import tempfile
 import zipfile
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import BinaryIO
@@ -160,7 +160,7 @@ class OutputService:
         *,
         overwrite_confirmed: bool = False,
         create_directory: bool = False,
-    ) -> Iterator[Path]:
+    ) -> Generator[Path, None, None]:
         """Expone un temporal y lo elimina si no llega a publicarse."""
 
         temporary_path = self.create_temporary_output(
@@ -340,7 +340,7 @@ class OutputService:
             ) from error
 
         try:
-            Document(docx_path)
+            Document(str(docx_path))
         except (PackageNotFoundError, OSError, ValueError, KeyError, zipfile.BadZipFile) as error:
             raise OutputValidationError(
                 "El documento Word generado no se puede abrir correctamente.",

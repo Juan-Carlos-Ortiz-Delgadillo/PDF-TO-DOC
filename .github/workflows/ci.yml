@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install project and development tools
+        run: python -m pip install ".[dev]"
+      - name: Update the environment installer
+        run: python -m pip install --upgrade pip
+      - name: Lint
+        run: ruff check app tests build.py
+      - name: Type check
+        run: mypy
+      - name: Test core application logic
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: >-
+          pytest
+          --cov=app.core
+          --cov=app.models
+          --cov=app.services.conversion_service
+          --cov=app.services.pdf_analyzer
+          --cov=app.services.output_service
+          --cov=app.utils.file_utils
+          --cov=app.utils.validation
+          --cov-report=term-missing
+          --cov-fail-under=80
+      - name: Security analysis
+        run: bandit -q -r app -ll
+      - name: Dependency audit
+        run: pip-audit --skip-editable

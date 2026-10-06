@@ -79,6 +79,7 @@ class ConversionService:
                 temp_output,
                 selected_pages,
                 total_pages=pdf_info.page_count,
+                multiprocessing_enabled=config.multiprocessing_enabled,
             )
             validated_path = self.output_service.validate_docx(temp_output)
             published_path = self.output_service.publish(
@@ -113,6 +114,7 @@ class ConversionService:
         selected_pages: tuple[int, ...],
         *,
         total_pages: int,
+        multiprocessing_enabled: bool,
     ) -> None:
         """Convierte el PDF usando la librería local pdf2docx."""
 
@@ -127,23 +129,27 @@ class ConversionService:
 
         converter = Converter(str(pdf_path))
         try:
-            if total_pages > 0 and len(selected_pages) == total_pages:
-                converter.convert(str(output_path))
-                return
-            if selected_pages and len(selected_pages) == 1:
-                start_page = end_page = selected_pages[0]
-            elif selected_pages:
-                start_page = selected_pages[0]
-                end_page = selected_pages[-1]
-            else:
-                start_page = 1
-                end_page = total_pages
-
-            if start_page <= 0 or end_page <= 0:
+            all_pages = tuple(range(1, total_pages + 1))
+            if selected_pages == all_pages:
                 converter.convert(str(output_path))
                 return
 
-            converter.convert(str(output_path), start=start_page, end=end_page)
+            if selected_pages and selected_pages == tuple(
+                range(selected_pages[0], selected_pages[-1] + 1)
+            ):
+                converter.convert(
+                    str(output_path),
+                    start=selected_pages[0] - 1,
+                    end=selected_pages[-1],
+                    multi_processing=multiprocessing_enabled,
+                )
+                return
+
+            converter.convert(
+                str(output_path),
+                pages=[page - 1 for page in selected_pages],
+                multi_processing=False,
+            )
         except Exception as error:
             raise ConversionError(
                 "La librería local de conversión falló durante la exportación.",
