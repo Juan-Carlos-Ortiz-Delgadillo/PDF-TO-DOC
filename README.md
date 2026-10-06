@@ -60,40 +60,91 @@ El mantenedor confirma que creó el icono y autoriza su uso y redistribución p�
 
 ## Descargas
 
-Descarga la versión más reciente desde [GitHub Releases](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest). Allí encontrarás los paquetes autocontenidos para macOS, Windows y Linux, junto con sus checksums SHA-256.
+Descarga la versión más reciente desde [GitHub Releases](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest). El release contiene estos paquetes:
 
-Para macOS también está disponible el [instalador DMG de arrastrar a Applications](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest/download/PDF2Word.dmg) y su [checksum SHA-256](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest/download/PDF2Word.dmg.sha256). La aplicación macOS aún no está firmada con Developer ID ni notarizada; Gatekeeper puede mostrar una advertencia al abrirla.
+| Sistema | Archivo | Arquitectura |
+| --- | --- | --- |
+| macOS | [`PDF2Word.dmg`](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest/download/PDF2Word.dmg) | Apple Silicon (arm64) |
+| macOS, alternativa comprimida | `PDF2Word-<version>-macos-arm64.tar.gz` ([release](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest)) | Apple Silicon (arm64) |
+| Windows | `PDF2Word-<version>-windows-x86_64.zip` ([release](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest)) | 64 bits, Intel/AMD (x86_64) |
+| Linux | `PDF2Word-<version>-linux-x86_64.tar.gz` ([release](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest)) | 64 bits, Intel/AMD (x86_64) |
 
-### Instalación en macOS con imagen DMG
+`<version>` es el número de versión del release (por ejemplo, `1.0.0`). Abre la página del release y descarga el archivo de la tabla que coincida con tu sistema y arquitectura.
 
-En macOS, instala las dependencias de desarrollo y ejecuta:
+Los paquetes son ejecutables autocontenidos: no requieren instalar Python. Linux sí necesita las bibliotecas gráficas del sistema indicadas abajo.
+
+### Instalar en macOS
+
+1. Descarga `PDF2Word.dmg` y ábrelo.
+2. En la ventana del Finder, arrastra **PDF2Word** a **Applications**.
+3. Cuando termine la copia, expulsa el volumen DMG y abre PDF2Word desde Applications.
+
+El DMG es la opción recomendada. El archivo `.tar.gz` alternativo contiene `PDF2Word.app` en la raíz: extráelo y mueve esa app a Applications. Este release es para Apple Silicon; no se publica un build nativo Intel. La aplicación no está firmada con Developer ID ni notarizada, por lo que Gatekeeper puede advertir al abrirla.
+
+### Instalar en Windows
+
+1. Descarga el archivo `.zip` y extráelo (por ejemplo, con **Extraer todo** en el menú contextual).
+2. Abre la carpeta extraída y ejecuta `PDF2Word.exe`.
+
+El ZIP contiene directamente `PDF2Word.exe` en su raíz; no hay instalador ni asistente. Es un build para Windows de 64 bits x86_64. Windows SmartScreen puede mostrar una advertencia porque el ejecutable no tiene firma de editor.
+
+### Instalar en Linux
+
+Descarga el archivo `PDF2Word-<version>-linux-x86_64.tar.gz` y abre una terminal en la carpeta donde se descargó. Para la versión 1.0.0, ejecuta:
+
+```bash
+tar -xzf PDF2Word-1.0.0-linux-x86_64.tar.gz
+./PDF2Word
+```
+
+El archivo contiene el ejecutable `PDF2Word` directamente en su raíz; no crea una carpeta al extraerlo. El paquete es para Linux x86_64. En Ubuntu 22.04 o posterior, instala las bibliotecas gráficas de Qt que necesita con:
+
+```bash
+sudo apt update
+sudo apt install libegl1 libxcb-cursor0 libxcb-image0 libxcb-icccm4 \
+  libxcb-render-util0 libxcb-keysyms1 libxcb-shape0 libxkbcommon-x11-0 \
+  libxcb-xkb1
+```
+
+En otras distribuciones instala los paquetes equivalentes. Si el sistema informa que no se puede ejecutar por permisos, usa `chmod +x PDF2Word` y vuelve a ejecutar `./PDF2Word`.
+
+No necesitas instalar Python. El ejecutable incluye Python y las dependencias de la aplicación, pero utiliza bibliotecas gráficas del sistema operativo.
+
+### Comprobar la descarga
+
+Cada paquete comprimido tiene un manifiesto `SHA256SUMS-PDF2Word-<version>-<plataforma>.txt` con su SHA-256. Descarga el manifiesto correspondiente en la misma carpeta que el paquete. En Linux, por ejemplo para la versión 1.0.0:
+
+```bash
+sha256sum --check SHA256SUMS-PDF2Word-1.0.0-linux-x86_64.txt
+```
+
+Para el DMG de macOS, descarga también [`PDF2Word.dmg.sha256`](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest/download/PDF2Word.dmg.sha256), colócalo junto al DMG y ejecuta `shasum -a 256 -c PDF2Word.dmg.sha256` desde esa carpeta. Un resultado `OK` confirma que el archivo coincide con el checksum publicado. Los checksums no instalan la aplicación.
+
+En macOS se comprueba un manifiesto de paquete comprimido con `shasum -a 256 -c <nombre-del-manifiesto>`. En Windows PowerShell, con el ZIP y su manifiesto en la misma carpeta, ejecuta (sustituye `1.0.0` si descargaste otra versión):
+
+```powershell
+$expected = ((Get-Content .\SHA256SUMS-PDF2Word-1.0.0-windows-x86_64.txt -Raw) -split '\s+')[0]
+$actual = (Get-FileHash .\PDF2Word-1.0.0-windows-x86_64.zip -Algorithm SHA256).Hash
+if ($actual -ne $expected) { throw "Checksum incorrecto" }
+"Checksum OK"
+```
+
+### Construir el DMG desde el código fuente (mantenedores)
+
+Estas instrucciones son para generar el instalador, no para instalar una descarga. En macOS, con Python 3.12, clona el repositorio, instala las dependencias de desarrollo y ejecuta:
 
 ```bash
 python -m pip install ".[dev]"
 ./scripts/build-dmg.sh
 ```
 
-El archivo `dist/PDF2Word.dmg` abre en Finder con la app, una flecha visual y
-un acceso directo a Applications; arrastra la app a Applications para
-instalarla. `dist/PDF2Word.dmg.sha256` contiene su checksum. Para reutilizar un
-bundle existente sin reconstruirlo, ejecuta
-`./scripts/build-dmg.sh --skip-build`.
+El DMG se crea en `dist/PDF2Word.dmg`. Usa `--skip-build` para empaquetar un bundle `.app` ya generado. El fondo editable está en `assets/dmg-background.svg`; después de modificarlo, regenera el PNG que usa Finder con:
 
-El fondo se define en `assets/dmg-background.svg`; la imagen PNG de 1400×900
-que Finder muestra se guarda en `assets/dmg-background.png` y dentro del DMG
-como `.background.png`. Los tamaños de
-ventana, posiciones e iconos se configuran en
-`scripts/dmgbuild_settings.py`. El proceso valida los metadatos de `.DS_Store`,
-el alias `/Applications`, el bundle y la imagen de fondo antes de terminar.
-Para regenerar el PNG tras cambiar el SVG, ejecuta
-`sips -s format png assets/dmg-background.svg --out assets/dmg-background.png`.
+```bash
+sips -s format png assets/dmg-background.svg --out assets/dmg-background.png
+```
 
-La imagen no está firmada con Developer ID ni notarizada. Para distribución
-pública sin las advertencias habituales de Gatekeeper se necesita una
-membresía de Apple Developer, un certificado **Developer ID Application**,
-firma con Hardened Runtime y notarización mediante `notarytool`. No guardes
-certificados ni credenciales en el repositorio o en el DMG; configúralos como
-secretos del sistema de build cuando estén disponibles.
+El tamaño de ventana, la posición de los iconos y sus tamaños se configuran en `scripts/dmgbuild_settings.py`. La distribución pública firmada y sin advertencias de Gatekeeper requiere membresía de Apple Developer, certificado **Developer ID Application**, firma con Hardened Runtime y notarización mediante `notarytool`. No guardes certificados ni credenciales en el repositorio.
 
 ## Privacidad y limitaciones
 
