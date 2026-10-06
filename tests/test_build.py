@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import tarfile
+import tomllib
 import zipfile
 from pathlib import Path
 from runpy import run_path
 
 _archive = run_path(Path(__file__).resolve().parents[1] / "build.py")["_archive"]
+PROJECT_FILE = Path(__file__).resolve().parents[1] / "pyproject.toml"
 
 
 def test_archive_includes_onedir_tree_in_zip(tmp_path: Path) -> None:
@@ -41,3 +43,23 @@ def test_archive_includes_onedir_tree_in_tarball(tmp_path: Path) -> None:
             "PDF2Word.app/Contents/MacOS",
             "PDF2Word.app/Contents/MacOS/PDF2Word",
         ]
+
+
+def test_critical_conversion_distributions_remain_declared() -> None:
+    with PROJECT_FILE.open("rb") as project_file:
+        project = tomllib.load(project_file)["project"]
+    dependency_names = {
+        requirement.partition("==")[0].casefold().replace("_", "-")
+        for requirement in project["dependencies"]
+    }
+
+    assert dependency_names >= {
+        "pdf2docx",
+        "pymupdf",
+        "python-docx",
+        "numpy",
+        "opencv-python-headless",
+        "fonttools",
+        "fire",
+        "lxml",
+    }

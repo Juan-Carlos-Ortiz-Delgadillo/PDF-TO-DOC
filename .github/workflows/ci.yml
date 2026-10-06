@@ -28,6 +28,8 @@ jobs:
         run: ruff check app tests build.py scripts/benchmark_startup.py
       - name: Type check
         run: mypy
+      - name: Guard dynamically imported conversion dependencies
+        run: pytest tests/test_build.py -q
       - name: Test core application logic
         env:
           QT_QPA_PLATFORM: offscreen
