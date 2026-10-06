@@ -216,6 +216,23 @@ def _archive(payload: Path, destination: Path) -> None:
         bundle.add(payload, arcname=payload.name)
 
 
+def _packaged_paths(
+    dist_directory: Path,
+    *,
+    system: str,
+    mode: str,
+) -> tuple[Path, Path]:
+    executable_name = f"{APP_NAME}.exe" if system == "windows" else APP_NAME
+    if system == "macos":
+        payload = dist_directory / f"{APP_NAME}.app"
+        return payload, payload / "Contents" / "MacOS" / APP_NAME
+    if mode == "onedir":
+        payload = dist_directory / APP_NAME
+        return payload, payload / executable_name
+    executable = dist_directory / executable_name
+    return executable, executable
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -289,12 +306,11 @@ def main() -> int:
     arguments.append(str(ROOT / "app" / "ui" / "launcher.py"))
     run_pyinstaller(arguments)
 
-    executable_name = f"{APP_NAME}.exe" if system == "windows" else APP_NAME
-    executable = dist_directory / executable_name
-    payload = executable
-    if system == "macos":
-        payload = dist_directory / f"{APP_NAME}.app"
-        executable = payload / "Contents" / "MacOS" / APP_NAME
+    payload, executable = _packaged_paths(
+        dist_directory,
+        system=system,
+        mode=options.mode,
+    )
     if not executable.is_file():
         raise FileNotFoundError(f"PyInstaller no creó el ejecutable esperado: {executable}")
 
