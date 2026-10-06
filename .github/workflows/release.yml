@@ -37,8 +37,15 @@ jobs:
           sudo apt-get install --yes libegl1
       - name: Update the environment installer
         run: python -m pip install --upgrade pip
-      - name: Build standalone executable and checksums
-        run: python build.py
+      - name: Build onedir and enforce startup budget
+        run: python build.py --mode onedir
+      - name: Upload startup benchmark
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: startup-benchmark-${{ matrix.target }}
+          path: dist/startup-benchmark.json
+          if-no-files-found: warn
       - name: Create Finder drag-and-drop DMG
         if: runner.os == 'macOS'
         run: ./scripts/build-dmg.sh --skip-build

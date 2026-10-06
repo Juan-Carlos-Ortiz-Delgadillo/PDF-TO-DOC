@@ -12,7 +12,12 @@ bandit -q -r app -ll
 pip-audit --skip-editable
 ```
 
-Para probar la construcción nativa de tu plataforma, ejecuta `python build.py`. Conserva el nombre `PDF2Word` y los iconos de `assets/`; no los cambies sin una decisión explícita del mantenedor. El mantenedor confirma haber creado el icono y autoriza su redistribución pública con la aplicación.
+Para probar la construcción nativa y verificar el presupuesto del primer paint
+en tu plataforma, ejecuta `python build.py --mode onedir`. El benchmark requiere
+diez lanzamientos y deja su resultado en `dist/startup-benchmark.json`. Conserva
+el nombre `PDF2Word` y los iconos de `assets/`; no los cambies sin una decisión
+explícita del mantenedor. El mantenedor confirma haber creado el icono y
+autoriza su redistribución pública con la aplicación.
 
 En macOS, `./scripts/build-dmg.sh` construye la app, crea un DMG de arrastrar
 a Applications y verifica su contenido. Usa `--skip-build` para empaquetar un

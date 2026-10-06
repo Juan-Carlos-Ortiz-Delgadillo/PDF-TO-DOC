@@ -11,6 +11,7 @@ from app.core.config import AppSettings, ConfigRepository, Theme
 from app.services.settings_service import SettingsService
 from app.ui.components.drop_zone import DropZone
 from app.ui.dialogs.settings_dialog import SettingsDialog
+from app.ui.launcher import StartupWindow
 from app.ui.main_window import MainWindow
 
 
@@ -34,6 +35,19 @@ def test_main_window_starts() -> None:
     assert select_button is not None
     assert window.drop_zone.rect().contains(select_button.geometry())
     assert window.drop_zone.height() - select_button.geometry().bottom() >= 12
+
+
+def test_startup_window_marks_first_completed_paint(tmp_path: Path) -> None:
+    app = QApplication.instance() or QApplication([])
+    marker_path = tmp_path / "first-paint.txt"
+    window = StartupWindow(marker_path=marker_path)
+
+    window.show()
+    app.processEvents()
+
+    assert marker_path.is_file()
+    assert int(marker_path.read_text(encoding="ascii")) > 0
+    assert window._marker_path is None
 
 
 def test_dark_theme_is_applied_from_saved_settings(tmp_path: Path) -> None:

@@ -35,7 +35,7 @@ dev = [
 pdf2word = "app.main:main"
 
 [project.gui-scripts]
-pdf2word-gui = "app.ui.main_window:main"
+pdf2word-gui = "app.ui.launcher:main"
 
 [tool.setuptools.packages.find]
 include = ["app*"]

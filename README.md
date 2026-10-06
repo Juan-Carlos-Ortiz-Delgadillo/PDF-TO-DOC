@@ -49,10 +49,31 @@ El OCR es opcional y requiere OCRmyPDF, Tesseract y los datos del idioma elegido
 Con Python 3.12 y las dependencias de desarrollo instaladas, ejecuta:
 
 ```bash
-python build.py
+python build.py --mode onedir
 ```
 
-El proceso genera una aplicación GUI autocontenida, comprueba que arranque y crea un archivo comprimido con su checksum SHA-256 en `dist/`. En macOS el archivo contiene un bundle `.app`; en Windows y Linux contiene un ejecutable. La construcción se hace nativamente en cada plataforma. Las publicaciones automatizadas incluyen macOS (arquitectura del runner), Windows x86_64 y Linux x86_64. El binario Linux requiere bibliotecas del sistema compatibles con Ubuntu 22.04 o posterior.
+El proceso genera una aplicación GUI autocontenida en formato PyInstaller
+`--onedir`, mide diez lanzamientos desde el inicio del proceso hasta el primer
+paint de Qt y crea un archivo comprimido con checksum SHA-256 en `dist/`.
+Falla si el primer lanzamiento supera 0,9 s o la mediana de los nueve
+lanzamientos siguientes supera 0,45 s; esos umbrales dejan un margen del 10 %
+respecto al objetivo de 1 s en frío y 500 ms en caliente. “Frío” en este test
+significa el primer proceso tras compilar: GitHub-hosted runners no garantizan
+una caché de disco/OS vacía. La prueba usa el plugin Qt offscreen, por lo que
+mide el primer render de la ventana sin medir inicialización física del monitor.
+Los resultados y tamaños del bundle/archivo se guardan en
+`dist/startup-benchmark.json`. El mismo informe registra, sin gate, cuándo la
+ventana principal queda lista después de la splash.
+
+En macOS el archivo comprimido contiene `PDF2Word.app`; en Windows y Linux
+contiene una carpeta `PDF2Word` con el ejecutable y sus dependencias. La
+construcción se hace nativamente en cada plataforma. CI ejecuta la medición
+para macOS arm64, Windows x86_64 y Linux x86_64. El binario Linux requiere
+bibliotecas del sistema compatibles con Ubuntu 22.04 o posterior.
+
+`--onefile` se puede seleccionar para comparar con
+`python build.py --mode onefile`, pero no es el formato principal porque la
+extracción temporal en cada lanzamiento aumenta la latencia.
 
 El build usa los iconos específicos de plataforma en `assets/` (ICNS para macOS, ICO para Windows y PNG para Linux). El nombre de la aplicación se conserva como `PDF2Word`.
 
@@ -84,9 +105,13 @@ El DMG es la opción recomendada. El archivo `.tar.gz` alternativo contiene `PDF
 ### Instalar en Windows
 
 1. Descarga el archivo `.zip` y extráelo (por ejemplo, con **Extraer todo** en el menú contextual).
-2. Abre la carpeta extraída y ejecuta `PDF2Word.exe`.
+2. Abre `PDF2Word` dentro de la carpeta extraída y ejecuta `PDF2Word.exe`.
 
-El ZIP contiene directamente `PDF2Word.exe` en su raíz; no hay instalador ni asistente. Es un build para Windows de 64 bits x86_64. Windows SmartScreen puede mostrar una advertencia porque el ejecutable no tiene firma de editor.
+El ZIP contiene la carpeta `PDF2Word`; ejecuta
+`PDF2Word\PDF2Word.exe` dentro de ella, sin mover el EXE fuera de la carpeta de
+dependencias. No hay instalador ni asistente. Es un build para Windows de 64
+bits x86_64. Windows SmartScreen puede mostrar una advertencia porque el
+ejecutable no tiene firma de editor.
 
 ### Instalar en Linux
 
@@ -94,10 +119,13 @@ Descarga el archivo `PDF2Word-<version>-linux-x86_64.tar.gz` y abre una terminal
 
 ```bash
 tar -xzf PDF2Word-1.0.0-linux-x86_64.tar.gz
-./PDF2Word
+./PDF2Word/PDF2Word
 ```
 
-El archivo contiene el ejecutable `PDF2Word` directamente en su raíz; no crea una carpeta al extraerlo. El paquete es para Linux x86_64. En Ubuntu 22.04 o posterior, instala las bibliotecas gráficas de Qt que necesita con:
+El archivo contiene la carpeta `PDF2Word` con el ejecutable y las bibliotecas
+empaquetadas. No separes el ejecutable de esa carpeta. El paquete es para Linux
+x86_64. En Ubuntu 22.04 o posterior, instala las bibliotecas gráficas de Qt
+que necesita con:
 
 ```bash
 sudo apt update
@@ -106,7 +134,7 @@ sudo apt install libegl1 libxcb-cursor0 libxcb-image0 libxcb-icccm4 \
   libxcb-xkb1
 ```
 
-En otras distribuciones instala los paquetes equivalentes. Si el sistema informa que no se puede ejecutar por permisos, usa `chmod +x PDF2Word` y vuelve a ejecutar `./PDF2Word`.
+En otras distribuciones instala los paquetes equivalentes. Si el sistema informa que no se puede ejecutar por permisos, usa `chmod +x PDF2Word/PDF2Word` y vuelve a ejecutar `./PDF2Word/PDF2Word`.
 
 No necesitas instalar Python. El ejecutable incluye Python y las dependencias de la aplicación, pero utiliza bibliotecas gráficas del sistema operativo.
 

@@ -76,9 +76,11 @@ de sintaxis YAML de los workflows.
 `pdf2word` y `pdf2word-gui`, y el conjunto de desarrollo. Se fija Python 3.12
 y NumPy 1.26.4 por compatibilidad observada entre Qt/Shiboken y NumPy.
 
-`python build.py` utiliza PyInstaller para crear un ejecutable autocontenido
-para la plataforma local, ejecuta una prueba de arranque y escribe un archivo
-comprimido con su manifiesto SHA-256.
+`python build.py --mode onedir` utiliza PyInstaller para crear un ejecutable
+autocontenido para la plataforma local, mide el tiempo hasta el primer paint de
+Qt en diez lanzamientos y escribe un archivo comprimido con su manifiesto
+SHA-256. El artefacto onedir es el formato principal. `--mode onefile` permanece
+disponible para comparación, no como distribución recomendada.
 
 Para macOS se añadió un distribuidor `.dmg` con `dmgbuild` y herramientas
 nativas `hdiutil`. Su configuración escribe `.DS_Store` directamente en lugar
@@ -150,7 +152,71 @@ antes de cada publicación.
 - Confirmar los builds de Windows y Linux al ejecutar los workflows de
   GitHub Actions.
 
-## 8. Instrucciones de publicación
+## 8. Medición de arranque
+
+Se añadió un lanzador de dos fases que muestra una ventana mínima antes de
+cargar la ventana completa y un benchmark que mide el primer paint y el momento
+en que la ventana principal queda lista. La medición usa Qt offscreen y
+`time.monotonic_ns()` compartido entre proceso padre e hijo; no mide el tiempo
+de presentación física del monitor. “Frío” es la primera ejecución después de
+compilar, no una caché de disco vaciada: los runners y esta máquina no permiten
+garantizar esta última condición.
+
+En macOS arm64, con PyInstaller `--onefile` anterior al lanzador, diez
+lanzamientos dieron 9,088 s al primer paint y 7,059 s de mediana caliente. El
+build onedir más reciente dio 1,192 s al primer paint, 0,231 s de mediana
+caliente, 1,292 s hasta que la ventana principal estuvo lista en frío y 0,291 s
+de mediana caliente para estar lista. En otra extracción independiente del
+tarball, el primer paint midió 1,003 s; la diferencia demuestra que la primera
+muestra depende mucho del estado de caché y del runner. Por lo tanto, el
+artefacto local queda sobre el objetivo frío estricto de 1 s y no cumple el
+presupuesto CI con 10 % de margen (0,9 s). El perfil
+Python atribuye unos 0,28 s a los imports del entrypoint y 0,12 s a construir
+la ventana completa; el coste restante se concentra en la inicialización/carga
+fría de PySide6 y sus bibliotecas nativas. No se enmascara este resultado con
+las ejecuciones calientes. El JSON generado registra muestras y tamaños
+exactos.
+
+En `-X importtime`, los mayores acumulados inclusivos del entrypoint fueron
+`app.ui.main_window` (344 ms), `PySide6.QtCore` (201 ms), `PySide6` (151 ms),
+`shiboken6` (150 ms) y `numpy.core._multiarray_umath` (100 ms). Los tiempos
+anidados se solapan y no deben sumarse. En `cProfile`, los principales costes
+fueron la carga dinámica de módulos (234 ms acumulados), la construcción de
+`MainWindow` (127 ms), `_build_ui` (123 ms), el setup Qt de Shiboken (87 ms) y
+`QScrollArea.setWidget` (36 ms). La UI principal se difiere hasta después de
+pintar la ventana mínima; no se movió procesamiento de conversión que ya era
+perezoso ni se reemplazaron dependencias sin evidencia de mejora segura.
+
+El bundle onedir local fue de 297.727.696 bytes y su tarball comprimido,
+117.936.310 bytes. El onefile de comparación generó un bundle de 118.259.771
+bytes y un tarball de aproximadamente 115 MB, a costa de extraer dependencias
+en cada arranque. No se excluyó
+OpenCV (`cv2`, unos 116 MB), porque `pdf2docx` lo requiere para conversión; los
+módulos/archivos Qt tampoco se excluyeron sin una prueba de regresión de
+conversión/UI. Nuitka 4.2.2 fue instalado únicamente en el entorno local para
+comparación; su compilación standalone permaneció en la etapa de compilación C
+por más de 10 minutos y se detuvo, sin producir un ejecutable que pudiera
+cronometrarse, por lo que no se adopta.
+UPX se desactiva explícitamente en PyInstaller y no se consideró optimización.
+
+PyInstaller `--onedir` queda como empaquetado principal, y CI/release ejecutan
+diez muestras con presupuestos de 0,9 s para el primer paint y 0,45 s para la
+mediana caliente (10 % de margen respecto al objetivo). CI genera resultados
+para los tres sistemas; esta máquina solo pudo validar macOS arm64. El gate frío
+puede revelar una violación real y bloquear un build; no se suaviza
+automáticamente por una segunda ejecución rápida. La máquina local solo pudo
+medir macOS arm64. Su entorno Python tiene PySide6 Essentials 6.8.3 y NumPy
+2.5.3, distintos a las versiones fijadas por `pyproject.toml`; los valores no
+sustituyen la medición de CI con el entorno declarado.
+
+Para bajar el primer paint frío, las siguientes opciones seguras son medir en
+runners limpios con las versiones fijadas, revisar con pruebas si PyInstaller
+incluye plugins/frameworks Qt no usados y comparar un launcher nativo mínimo.
+No se excluyeron binarios necesarios para conversión ni se cambió de framework
+sin esa evidencia. Hasta que el runner y/o una optimización posterior cumplan
+el gate, el job de rendimiento reportará fallo y bloqueará la publicación.
+
+## 9. Instrucciones de publicación
 
 Después de revisar los puntos pendientes y confirmar la versión, publicar el
 primer release con:
