@@ -61,6 +61,7 @@ QLineEdit:disabled {
 QPushButton#primary {
     color: #ffffff;
     background: #3978d4;
+    border-color: #173f87;
 }
 
 QPushButton#primary:hover {
@@ -74,8 +75,8 @@ QPushButton#primary:focus {
 QPushButton#secondary,
 DropZone QPushButton {
     color: #b7d2ff;
-    background: transparent;
-    border-color: #6499e8;
+    background: #30363d;
+    border: 2px solid #6499e8;
 }
 
 QPushButton#secondary:hover,

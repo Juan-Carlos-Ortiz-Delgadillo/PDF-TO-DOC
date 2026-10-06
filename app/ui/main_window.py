@@ -433,14 +433,24 @@ class MainWindow(QMainWindow):
         output_path = config.output_path
         if output_path.exists():
             reply = QMessageBox(self)
+            reply.setStyleSheet(self.styleSheet())
             reply.setWindowTitle("Archivo existente")
             reply.setText(f"Ya existe el archivo:\n{output_path}\n\n¿Deseas reemplazarlo?")
-            reply.addButton("Reemplazar", QMessageBox.ButtonRole.AcceptRole)
+            replace_button = reply.addButton(
+                "Reemplazar",
+                QMessageBox.ButtonRole.AcceptRole,
+            )
+            replace_button.setObjectName("primary")
+            replace_button.setMinimumWidth(136)
             choose_button = reply.addButton(
                 "Elegir otro nombre",
                 QMessageBox.ButtonRole.ActionRole,
             )
+            choose_button.setObjectName("secondary")
+            choose_button.setMinimumWidth(184)
             cancel_button = reply.addButton("Cancelar", QMessageBox.ButtonRole.RejectRole)
+            cancel_button.setObjectName("secondary")
+            cancel_button.setMinimumWidth(128)
             reply.exec()
             if reply.clickedButton() is cancel_button:
                 return
