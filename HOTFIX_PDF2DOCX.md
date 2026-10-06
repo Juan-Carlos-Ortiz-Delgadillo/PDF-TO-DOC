@@ -52,7 +52,8 @@ no se cambió la lógica de conversión ni se quitaron dependencias.
 - Arranque del bundle final en macOS 27 arm64, 10 ejecuciones: primer paint
   frío 0,428 s; mediana caliente 0,402 s; p95 caliente 0,427 s. Ventana
   principal lista: 0,534 s fría y mediana caliente 0,467 s. El gate del build
-  pasó (límites: 0,9 s frío y 0,45 s de mediana caliente).
+  pasó. Los límites del CI siguen los objetivos solicitados: 1 s en frío y
+  0,5 s de mediana en caliente.
 - Comparado con el bundle fijado anterior medido en la misma máquina, el
   primer paint pasó de 0,612 a 0,428 s en frío y de 0,421 a 0,402 s de mediana
   caliente. El bundle pasó de 270.746.324 a 284.104.391 bytes (+4,9%); esta
@@ -84,3 +85,9 @@ tests. El smoke usa `PATH` vacío, pero no sustituye una validación en una VM
 limpia sin Python instalado ni la revisión de firma/notarización de los
 instaladores antes de publicar. OCR sigue dependiendo de herramientas
 externas opcionales y no forma parte de esta prueba de conversión.
+
+El build usa la carpeta contenedora de PyInstaller para localizar el ejecutable
+en modo `onedir` en Windows y Linux. El gate de arranque usa los límites
+predeterminados medidos por 10 ejecuciones: 1 s en frío y 0,5 s de mediana
+caliente; umbrales locales más estrictos resultaron sensibles a la variación
+del runner macOS compartido.
