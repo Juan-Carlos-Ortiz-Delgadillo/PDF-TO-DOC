@@ -5,7 +5,7 @@ from pathlib import Path
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QDialogButtonBox, QPushButton
 
 from app.core.config import AppSettings, ConfigRepository, Theme
 from app.services.settings_service import SettingsService
@@ -22,7 +22,7 @@ def test_main_window_starts() -> None:
     assert window.size().width() >= 800
     app.processEvents()
     assert "QLineEdit:disabled" in window.styleSheet()
-    assert window.drop_zone.maximumHeight() <= 160
+    assert window.drop_zone.maximumHeight() <= 184
     assert window.progress_card.maximumHeight() <= 80
     assert window.clean_button.objectName() == "secondary"
     assert window.convert_button.objectName() == "primary"
@@ -30,6 +30,10 @@ def test_main_window_starts() -> None:
         window.convert_button.mapTo(window, window.convert_button.rect().topLeft()).x()
     )
     assert "#f2f1ed" in window.styleSheet()
+    select_button = window.drop_zone.findChild(QPushButton, "secondary")
+    assert select_button is not None
+    assert window.drop_zone.rect().contains(select_button.geometry())
+    assert window.drop_zone.height() - select_button.geometry().bottom() >= 12
 
 
 def test_dark_theme_is_applied_from_saved_settings(tmp_path: Path) -> None:
@@ -54,6 +58,44 @@ def test_night_mode_can_be_selected_and_saved(tmp_path: Path) -> None:
     dialog._save()
 
     assert settings_service.load().theme is Theme.DARK
+    app.processEvents()
+
+
+def test_settings_dialog_action_buttons_are_distinguishable(tmp_path: Path) -> None:
+    app = QApplication.instance() or QApplication([])
+    settings_service = SettingsService(ConfigRepository(tmp_path / "settings.json"))
+    window = MainWindow(settings_service=settings_service)
+    dialog = SettingsDialog(window.settings, settings_service, window)
+    buttons = dialog.findChild(QDialogButtonBox)
+
+    assert buttons is not None
+    save_button = buttons.button(QDialogButtonBox.StandardButton.Save)
+    cancel_button = buttons.button(QDialogButtonBox.StandardButton.Cancel)
+    assert save_button is not None
+    assert cancel_button is not None
+    assert save_button.objectName() == "primary"
+    assert cancel_button.objectName() == "secondary"
+    assert "QPushButton#primary" in window.styleSheet()
+    assert "QPushButton#secondary" in window.styleSheet()
+    app.processEvents()
+
+
+def test_theme_preview_updates_immediately_and_cancel_restores(tmp_path: Path) -> None:
+    app = QApplication.instance() or QApplication([])
+    settings_service = SettingsService(ConfigRepository(tmp_path / "settings.json"))
+    window = MainWindow(settings_service=settings_service)
+    dialog = SettingsDialog(window.settings, settings_service, window)
+    dialog.themePreviewChanged.connect(window._preview_theme)
+    dialog.rejected.connect(window._restore_saved_theme)
+
+    dialog.theme_combo.setCurrentIndex(dialog.theme_combo.findData(Theme.DARK.value))
+    assert "#202326" in window.styleSheet()
+
+    dialog.reject()
+
+    assert "#202326" not in window.styleSheet()
+    assert "#f2f1ed" in window.styleSheet()
+    assert settings_service.load().theme is Theme.SYSTEM
     app.processEvents()
 
 

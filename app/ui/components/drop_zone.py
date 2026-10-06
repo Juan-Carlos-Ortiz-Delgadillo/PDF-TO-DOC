@@ -18,7 +18,7 @@ class DropZone(QFrame):
         super().__init__(parent)
         self.setAcceptDrops(True)
         self.setMinimumHeight(116)
-        self.setMaximumHeight(150)
+        self.setMaximumHeight(178)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         self._drag_active = False
 
@@ -41,7 +41,7 @@ class DropZone(QFrame):
         self._button.clicked.connect(self._open_file_dialog)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 10, 12, 10)
+        layout.setContentsMargins(16, 10, 16, 24)
         layout.setSpacing(6)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self._icon)

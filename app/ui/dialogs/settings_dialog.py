@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -26,6 +27,8 @@ from app.services.settings_service import SettingsService
 class SettingsDialog(QDialog):
     """Permite ajustar opciones locales básicas de la aplicación."""
 
+    themePreviewChanged = Signal(str)
+
     def __init__(
         self,
         settings: AppSettings,
@@ -45,6 +48,7 @@ class SettingsDialog(QDialog):
         self.theme_combo.addItem("Día (suave)", Theme.LIGHT.value)
         self.theme_combo.addItem("Noche", Theme.DARK.value)
         self.theme_combo.setCurrentIndex(self.theme_combo.findData(self.settings.theme.value))
+        self.theme_combo.currentIndexChanged.connect(self._preview_theme)
 
         self.output_dir = QLineEdit(str(self.settings.output_directory))
         self.output_dir.setReadOnly(True)
@@ -70,12 +74,23 @@ class SettingsDialog(QDialog):
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel
         )
+        save_button = buttons.button(QDialogButtonBox.StandardButton.Save)
+        if save_button is not None:
+            save_button.setObjectName("primary")
+        cancel_button = buttons.button(QDialogButtonBox.StandardButton.Cancel)
+        if cancel_button is not None:
+            cancel_button.setObjectName("secondary")
         buttons.accepted.connect(self._save)
         buttons.rejected.connect(self.reject)
 
         layout = QVBoxLayout(self)
         layout.addLayout(form)
         layout.addWidget(buttons)
+
+    def _preview_theme(self, index: int) -> None:
+        theme = self.theme_combo.itemData(index)
+        if theme is not None:
+            self.themePreviewChanged.emit(str(theme))
 
     def _choose_output_directory(self) -> None:
         directory = QFileDialog.getExistingDirectory(

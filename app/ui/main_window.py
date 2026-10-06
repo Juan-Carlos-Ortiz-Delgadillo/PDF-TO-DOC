@@ -275,10 +275,11 @@ class MainWindow(QMainWindow):
         scroll_area.setWidget(central_widget)
         self.setCentralWidget(scroll_area)
 
-    def _apply_stylesheet(self) -> None:
+    def _apply_stylesheet(self, theme: Theme | None = None) -> None:
         stylesheet_path = Path(__file__).with_name("styles.qss")
         stylesheet = stylesheet_path.read_text(encoding="utf-8")
-        if self.settings.theme is Theme.DARK:
+        active_theme = theme or self.settings.theme
+        if active_theme is Theme.DARK:
             dark_stylesheet_path = stylesheet_path.with_name("styles_dark.qss")
             stylesheet += "\n" + dark_stylesheet_path.read_text(encoding="utf-8")
         self.setStyleSheet(stylesheet)
@@ -512,11 +513,19 @@ class MainWindow(QMainWindow):
 
     def _open_settings(self) -> None:
         settings_dialog = SettingsDialog(self.settings, self.settings_service, self)
+        settings_dialog.themePreviewChanged.connect(self._preview_theme)
+        settings_dialog.rejected.connect(self._restore_saved_theme)
         if settings_dialog.exec() == SettingsDialog.DialogCode.Accepted:
             self.settings = self.settings_service.load()
             self._apply_stylesheet()
             self.output_dir_edit.setText(str(self.settings.output_directory))
             self.ocr_checkbox.setChecked(self.settings.ocr_enabled)
+
+    def _preview_theme(self, theme: str) -> None:
+        self._apply_stylesheet(Theme.coerce(theme))
+
+    def _restore_saved_theme(self) -> None:
+        self._apply_stylesheet(self.settings.theme)
 
     def _open_about(self) -> None:
         AboutDialog(self).exec()

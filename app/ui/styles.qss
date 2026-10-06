@@ -28,7 +28,7 @@ QLabel#app-subtitle {
 
 DropZone {
     min-height: 116px;
-    max-height: 150px;
+    max-height: 178px;
     border: 2px dashed #dadada;
     border-radius: 12px;
     background: #f8f7f3;
