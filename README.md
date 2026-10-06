@@ -58,6 +58,43 @@ El build usa los iconos específicos de plataforma en `assets/` (ICNS para macOS
 
 El mantenedor confirma que creó el icono y autoriza su uso y redistribución pública dentro de esta aplicación. Los metadatos de la imagen no permiten verificar esa autoría de forma independiente.
 
+## Descargas
+
+Descarga la versión más reciente desde [GitHub Releases](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest). Allí encontrarás los paquetes autocontenidos para macOS, Windows y Linux, junto con sus checksums SHA-256.
+
+Para macOS también está disponible el [instalador DMG de arrastrar a Applications](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest/download/PDF2Word.dmg) y su [checksum SHA-256](https://github.com/JuanOrtiz-Software/PDF-TO-DOC/releases/latest/download/PDF2Word.dmg.sha256). La aplicación macOS aún no está firmada con Developer ID ni notarizada; Gatekeeper puede mostrar una advertencia al abrirla.
+
+### Instalación en macOS con imagen DMG
+
+En macOS, instala las dependencias de desarrollo y ejecuta:
+
+```bash
+python -m pip install ".[dev]"
+./scripts/build-dmg.sh
+```
+
+El archivo `dist/PDF2Word.dmg` abre en Finder con la app, una flecha visual y
+un acceso directo a Applications; arrastra la app a Applications para
+instalarla. `dist/PDF2Word.dmg.sha256` contiene su checksum. Para reutilizar un
+bundle existente sin reconstruirlo, ejecuta
+`./scripts/build-dmg.sh --skip-build`.
+
+El fondo se define en `assets/dmg-background.svg`; la imagen PNG de 1400×900
+que Finder muestra se guarda en `assets/dmg-background.png` y dentro del DMG
+como `.background.png`. Los tamaños de
+ventana, posiciones e iconos se configuran en
+`scripts/dmgbuild_settings.py`. El proceso valida los metadatos de `.DS_Store`,
+el alias `/Applications`, el bundle y la imagen de fondo antes de terminar.
+Para regenerar el PNG tras cambiar el SVG, ejecuta
+`sips -s format png assets/dmg-background.svg --out assets/dmg-background.png`.
+
+La imagen no está firmada con Developer ID ni notarizada. Para distribución
+pública sin las advertencias habituales de Gatekeeper se necesita una
+membresía de Apple Developer, un certificado **Developer ID Application**,
+firma con Hardened Runtime y notarización mediante `notarytool`. No guardes
+certificados ni credenciales en el repositorio o en el DMG; configúralos como
+secretos del sistema de build cuando estén disponibles.
+
 ## Privacidad y limitaciones
 
 La conversión se realiza localmente. El proyecto no envía documentos a servicios remotos ni registra su contenido. Los PDFs complejos o escaneados pueden perder fidelidad; el OCR no garantiza exactitud ni una reproducción visual perfecta.

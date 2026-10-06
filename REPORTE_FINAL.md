@@ -80,6 +80,20 @@ y NumPy 1.26.4 por compatibilidad observada entre Qt/Shiboken y NumPy.
 para la plataforma local, ejecuta una prueba de arranque y escribe un archivo
 comprimido con su manifiesto SHA-256.
 
+Para macOS se añadió un distribuidor `.dmg` con `dmgbuild` y herramientas
+nativas `hdiutil`. Su configuración escribe `.DS_Store` directamente en lugar
+de depender de escrituras asíncronas de Finder. El bundle va a la izquierda,
+Applications a la derecha y una flecha está dibujada en el fondo. La ventana se
+configura a 700×450 puntos. El script monta el resultado y verifica bundle,
+icono, alias `/Applications`, fondo, posiciones, tamaño de iconos y metadatos
+de ventana; luego desmonta y calcula SHA-256. No se configuraron firma Developer
+ID ni notarización.
+
+El fondo SVG se rasterizó con `sips` de macOS: se confirmó que el PNG contiene
+la flecha azul y el borde, y se inspeccionó visualmente. El DMG final se
+reconstruyó después de corregir el PNG; `hdiutil verify`, el montaje, las
+comprobaciones del contenido y el desmontaje terminaron correctamente.
+
 Se corrigió un defecto del primer bundle macOS: las hojas de estilo se
 empaquetaban bajo `app/ui`, mientras que el punto de entrada congelado las
 buscaba junto al ejecutable temporal. Al no encontrarlas, la ventana se cerraba
@@ -97,10 +111,13 @@ Artefactos locales creados y verificados en macOS arm64:
 - `dist/PDF2Word.app`
 - `dist/PDF2Word-1.0.0-macos-arm64.tar.gz` (100 MB)
 - `dist/SHA256SUMS-PDF2Word-1.0.0-macos-arm64.txt`
+- `dist/PDF2Word.dmg` (creado y verificado después de regenerar el fondo)
+- `dist/PDF2Word.dmg.sha256`
 
 El bundle contiene las dos hojas QSS, PySide6, `pdf2docx`, PyMuPDF y
 `python-docx`. El checksum del tarball se verificó con `shasum -a 256 -c`.
-Los artefactos de `dist/` están ignorados por Git.
+El checksum del DMG también se generó y verificó. Los artefactos de `dist/`
+están ignorados por Git.
 
 ## 6. CI y releases
 
